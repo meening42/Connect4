@@ -245,7 +245,7 @@ player FourInRow::checkWinner(){
         QMessageBox msgBox;
         msgBox.setText(winner);
         msgBox.setInformativeText("Do you want to play another game?");
-        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Close);
         msgBox.setDefaultButton(QMessageBox::Ok);
         int ret = msgBox.exec();
 
@@ -253,8 +253,8 @@ player FourInRow::checkWinner(){
           case QMessageBox::Ok:
               initialize();
               break;
-          case QMessageBox::Cancel:
-              // Don't Save was clicked
+          case QMessageBox::Close:
+            
               break;
         }
     }
