@@ -6,6 +6,7 @@ FourInRow::FourInRow(QWidget* pParent) :
     selectedRow = 0;
     playerOnMove = red;
     initialize();
+    srand(time(NULL));
     qDebug()<<"constructor called ";
 }
 
@@ -83,7 +84,6 @@ void FourInRow::keyPressEvent(QKeyEvent *event){
         if(playerOnMove == red){
             insertCoinInRow(selectedRow);
             checkWinner();
-            switchPlayerOnMove();
         }
     }
 
@@ -99,18 +99,26 @@ void FourInRow::insertCoinInRow(int row){
             break;
         }
     }
-    srand(time(NULL));
+    switchPlayerOnMove();
 }
 
 void FourInRow::switchPlayerOnMove(){
     if(playerOnMove == red){
         playerOnMove =yellow;
+        computerMove();
     }
     else{
         playerOnMove = red;
     }
 };
 
+
+void FourInRow::computerMove(){
+     int row;
+     row = rand() % BOARD_WIDTH;
+     insertCoinInRow(row);
+     update();
+}
 //void FourInRow::makeMove(){
 //    int row;
 //    if(playerOnMove==red){
@@ -141,9 +149,13 @@ void FourInRow::initialize(){
 };
 
 
+
+
+
 player FourInRow::checkWinner(){
     qDebug()<<"checking winner ";
     // check horizontal:
+    player checkResault =empty;
     int max = BOARD_WIDTH>BOARD_HEIGHT? BOARD_WIDTH:BOARD_HEIGHT;
 
     for(int k = 0;k<6;k++){
@@ -212,18 +224,26 @@ player FourInRow::checkWinner(){
                         break;
                 }
                 if(inRowRed >= 4){
-                    qDebug()<<"Winner is RED";
-                    return red;
+                    qDebug()<<"_______WINNER is RED________";
+                    checkResault = red;
                 }
                 if(inRowYellow >= 4){
-                    qDebug()<<"Winner is YELLOW";
-                    return yellow;
+                    qDebug()<<"_______WINNER is YELLOW_____";
+                    checkResault = yellow;
                 }
             }
         }
     }
-    return empty;
-};
+    if ((checkResault==red) || (checkResault==yellow)){
+        QMessageBox msgBox;
+        msgBox.setText("The document has been modified.");
+        msgBox.setInformativeText("Do you want to save your changes?");
+        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Save);
+        int ret = msgBox.exec();
+    }
+    return checkResault;
+}
 
 
 

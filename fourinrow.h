@@ -8,6 +8,7 @@
 #include <QSpinBox>
 #include <QKeyEvent>
 #include <QDebug>
+#include <QMessageBox>
 
 #define BOARD_WIDTH 7
 #define BOARD_HEIGHT 6
@@ -29,7 +30,8 @@ public:
     void showBoard();
     void insertCoinInRow(int row);
     void switchPlayerOnMove();
-    void makeMove();
+    //void makeMove();
+    void computerMove();
     player checkWinner();
     void initialize();
 
