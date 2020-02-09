@@ -1,24 +1,21 @@
 
 
-#include "fourinrow.h"
+
 #include "windowmain.h"
+
 
 WindowMain::WindowMain(QWidget *parent)
     : QMainWindow(parent)
-{
-    setMinimumSize(500, 300);
+{   
+    setFixedSize(SQUARE_SIZE*BOARD_WIDTH, SQUARE_SIZE*(BOARD_HEIGHT+1));
 
     QMenu* pMenu = new QMenu("File");
     pMenu->addAction("Quit", this, SLOT(quit()));
     menuBar()->addMenu(pMenu);
 
-    QPushButton * btn = new QPushButton("hej",this);
-
-    FourInRow* pwc = new FourInRow(this);
-    setCentralWidget(pwc);
-
-    QHBoxLayout * layout = new QHBoxLayout;
-
+    FourInRow* game = new FourInRow(this);
+    setCentralWidget(game);
+    game->setFocus(Qt::OtherFocusReason);
 
 }
 

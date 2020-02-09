@@ -8,6 +8,7 @@
 #include <QToolBar>
 #include <QDebug>
 #include <QHBoxLayout>
+#include "fourinrow.h"
 
 class WindowMain : public QMainWindow
 {
