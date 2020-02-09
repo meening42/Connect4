@@ -44,6 +44,7 @@ private:
     int squareSize;
     player playerOnMove;
     player board[BOARD_WIDTH][BOARD_HEIGHT];
+    bool isDraw();
 };
 
 #endif // WIDGETCENTRAL_H

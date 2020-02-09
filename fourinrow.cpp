@@ -64,23 +64,18 @@ void FourInRow::paintEvent(QPaintEvent *event){
 void FourInRow::keyPressEvent(QKeyEvent *event){
     if(event->key() == Qt::Key_Right)
     {
-        qDebug()<<"Right Key pressed ";
         if(selectedRow < BOARD_WIDTH-1){
             selectedRow+=1;
-            qDebug()<<"Sellected row: "<<selectedRow;
         }
     }
     if(event->key() == Qt::Key_Left)
     {
-        qDebug()<<"Left Key pressed ";
         if(selectedRow >0){
             selectedRow-=1;
-            qDebug()<<"Sellected row: "<<selectedRow;
         }
     }
     if((event->key() == Qt::Key_Space) || (event->key() == Qt::Key_Down))
     {
-        qDebug()<<"Down Key pressed ";
         if(playerOnMove == red){
             insertCoinInRow(selectedRow);
             checkWinner();
@@ -93,14 +88,17 @@ void FourInRow::keyPressEvent(QKeyEvent *event){
 
 void FourInRow::insertCoinInRow(int row){
     qDebug()<<"Insert coin in row: "<<row;
-    for(int i = BOARD_HEIGHT-1;i>=0;i--){
+    for(int i = BOARD_HEIGHT-1;i>=0;--i){
         if(board[row][i]==empty){
             board[row][i]=playerOnMove;
             break;
         }
     }
     switchPlayerOnMove();
+    update();
 }
+
+
 
 void FourInRow::switchPlayerOnMove(){
     if(playerOnMove == red){
@@ -113,32 +111,22 @@ void FourInRow::switchPlayerOnMove(){
 };
 
 
+
+
 void FourInRow::computerMove(){
      int row;
+     do{
      row = rand() % BOARD_WIDTH;
+     }
+     while(board[row][0]!=empty);
      insertCoinInRow(row);
      update();
 }
-//void FourInRow::makeMove(){
-//    int row;
-//    if(playerOnMove==red){
-//        do{
-//            //cout<<endl<<"Select row to insert the coin: " ;
-//            //cin>>row;
-//            if(board[row-1][0]!=empty){
-//                //cout<<endl<<"Selected row is already full";
-//            }
-//        }
-//        while(board[row-1][0]!=empty);
 
-//        insertCoinInRow(row-1);
-//    }
-//    if(playerOnMove==yellow){
-//        row = rand() % BOARD_WIDTH;
-//        insertCoinInRow(row);
-//    }
-//    switchPlayerOnMove();
-//}
+
+
+
+
 
 void FourInRow::initialize(){
     for(int i = 0; i<BOARD_WIDTH;i++){
@@ -234,18 +222,21 @@ player FourInRow::checkWinner(){
             }
         }
     }
-    if ((checkResault==red) || (checkResault==yellow)){
-        QString winner = "";
+    if ((checkResault==red) || (checkResault==yellow) || isDraw()){
+        QString text = "";
         if(checkResault == red){
-            winner = "WINNER IS RED";
+            text = "WINNER IS RED";
         }
         else if(checkResault == yellow){
-            winner = "WINNERS IS YELLOW";
+            text = "WINNERS IS YELLOW";
+        }
+        else if(isDraw() && checkResault == empty){
+            text = "DRAW";
         }
         QMessageBox msgBox;
-        msgBox.setText(winner);
+        msgBox.setText(text);
         msgBox.setInformativeText("Do you want to play another game?");
-        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Close);
         msgBox.setDefaultButton(QMessageBox::Ok);
         int ret = msgBox.exec();
 
@@ -253,12 +244,20 @@ player FourInRow::checkWinner(){
           case QMessageBox::Ok:
               initialize();
               break;
-          case QMessageBox::Cancel:
-              // Don't Save was clicked
+          case QMessageBox::Close:
               break;
         }
     }
     return checkResault;
+}
+
+bool FourInRow::isDraw(){
+    for(int i = 0;i<BOARD_WIDTH;++i){
+        if(board[i][0]==empty){
+            return false;
+        }
+    }
+    return true;
 }
 
 
