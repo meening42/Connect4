@@ -12,6 +12,7 @@ FourInRow::FourInRow(QWidget* pParent) :
 
 
 
+
 void FourInRow::paintEvent(QPaintEvent *event){
     QPainter P(this);
     int multiplyer;
@@ -61,6 +62,8 @@ void FourInRow::paintEvent(QPaintEvent *event){
 
 }
 
+
+
 void FourInRow::keyPressEvent(QKeyEvent *event){
     if(event->key() == Qt::Key_Right)
     {
@@ -84,6 +87,8 @@ void FourInRow::keyPressEvent(QKeyEvent *event){
 
     update();
 }
+
+
 
 
 void FourInRow::insertCoinInRow(int row){
@@ -122,7 +127,6 @@ void FourInRow::computerMove(){
      insertCoinInRow(row);
      update();
 }
-
 
 
 
@@ -250,6 +254,8 @@ player FourInRow::checkWinner(){
     }
     return checkResault;
 }
+
+
 
 bool FourInRow::isDraw(){
     for(int i = 0;i<BOARD_WIDTH;++i){
