@@ -16,7 +16,8 @@
 
 enum player{
     yellow,
-    red
+    red,
+    empty
 };
 
 class FourInRow : public QWidget
@@ -25,6 +26,12 @@ class FourInRow : public QWidget
 
 public:
     FourInRow(QWidget* pParent = nullptr);
+    void showBoard();
+    void insertCoinInRow(int row);
+    void switchPlayerOnMove();
+    void makeMove();
+    player checkWinner();
+    void initialize();
 
 public slots:
     void paintEvent(QPaintEvent *event);
@@ -34,6 +41,7 @@ private:
     int margin;
     int squareSize;
     player playerOnMove;
+    player board[BOARD_WIDTH][BOARD_HEIGHT];
 };
 
 #endif // WIDGETCENTRAL_H
