@@ -10,6 +10,8 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <tuple>
+#include <vector>
+#include <QApplication>
 
 #define BOARD_WIDTH 7
 #define BOARD_HEIGHT 6
@@ -22,7 +24,10 @@ enum player{
     empty
 };
 
-
+struct pos{
+    int x;
+    int y;
+};
 class FourInRow : public QWidget
 {
     Q_OBJECT
@@ -40,12 +45,18 @@ public slots:
     void paintEvent(QPaintEvent *event);
     void keyPressEvent(QKeyEvent *event);
 private:
-    int selectedRow;
+    bool gameOver;
+    player winner;
     int margin;
+    int selectedRow;
     int squareSize;
     void copyBoradToVirtual();
     std::tuple<bool,int,int> checkPossibleWin(player p);
     player playerOnMove;
+    std::vector<struct pos> PositionsYellow;
+    std::vector<struct pos> PositionsRed;
+    std::vector<struct pos> winningPositionsYellow;
+    std::vector<struct pos> winningPositionsRed;
     player board[BOARD_WIDTH][BOARD_HEIGHT];
     player virtualBoard[BOARD_WIDTH][BOARD_HEIGHT];
     bool isDraw();
