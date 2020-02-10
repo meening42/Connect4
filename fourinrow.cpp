@@ -81,7 +81,7 @@ void FourInRow::keyPressEvent(QKeyEvent *event){
     {
         if(playerOnMove == red){
             insertCoinInRow(selectedRow);
-            checkWinner();
+            checkWinner(board,false);
         }
     }
 
@@ -106,6 +106,7 @@ void FourInRow::insertCoinInRow(int row){
 
 
 void FourInRow::switchPlayerOnMove(){
+    qDebug()<<"Switch player";
     if(playerOnMove == red){
         playerOnMove =yellow;
         computerMove();
@@ -119,12 +120,23 @@ void FourInRow::switchPlayerOnMove(){
 
 
 void FourInRow::computerMove(){
+     qDebug()<<"Computer move";
      int row;
-     do{
-     row = rand() % BOARD_WIDTH;
+     std::tuple <bool, int, int> temp = std::make_tuple(0, 0, false);
+     // check if computer has winning move
+     temp = checkPossibleWin(yellow);
+     if(std::get<0>(temp)==true){
+         insertCoinInRow(std::get<1>(temp));
      }
-     while(board[row][0]!=empty);
-     insertCoinInRow(row);
+     else{
+         do{
+         row = rand() % BOARD_WIDTH;
+         }
+         while(board[row][0]!=empty);
+         insertCoinInRow(row);
+     }
+
+
      update();
 }
 
@@ -133,18 +145,51 @@ void FourInRow::computerMove(){
 
 
 void FourInRow::initialize(){
+    qDebug()<<"Initialze";
     for(int i = 0; i<BOARD_WIDTH;i++){
         for(int j = 0; j<BOARD_HEIGHT;j++){
             board[i][j]=empty;
         }
     }
-};
+}
+
+void FourInRow::copyBoradToVirtual(){
+    qDebug()<<"copyBoradToVirtual";
+    for(int i = 0; i<BOARD_WIDTH; ++i){
+        for(int j=0;j<BOARD_HEIGHT;++j){
+            virtualBoard[i][j] = board[i][j];
+        }
+    }
+    qDebug()<<"Borad copied to virtual";
+}
+
+
+std::tuple<bool,int,int>FourInRow::checkPossibleWin(player p){
+    qDebug()<<"Check posible win for "<< p;
+    std::tuple <bool, int, int> temp = std::make_tuple(0, 0, false);
+
+    //copy board to virtual board
+    copyBoradToVirtual();
+    //check move
+    for(int i = 0; i<BOARD_WIDTH; ++i){
+        for(int j = BOARD_HEIGHT-1;j>=0;--j){
+            if(virtualBoard[i][j]==empty){
+                virtualBoard[i][j]=p;
+                if(p == checkWinner(virtualBoard, true)){
+                    temp = std::make_tuple(true, i, j);
+                    return temp;
+                }
+                virtualBoard[i][j]=empty;
+                break;
+            }
+        }
+    }
+    return temp;
+}
 
 
 
-
-
-player FourInRow::checkWinner(){
+player FourInRow::checkWinner(player  pArr[BOARD_WIDTH][BOARD_HEIGHT],bool isVirtualArr){
     qDebug()<<"checking winner ";
     // check horizontal:
     player checkResault =empty;
@@ -159,17 +204,17 @@ player FourInRow::checkWinner(){
                 switch (k) {
                     case 0: // check vertically
                         if(i<BOARD_WIDTH && j<BOARD_HEIGHT){
-                                z = board[i][j];
+                                z = pArr[i][j];
                         }
                         break;
                     case 1: // check horizontally
                         if(j<BOARD_WIDTH && i<BOARD_HEIGHT){
-                            z = board[j][i];
+                            z = pArr[j][i];
                         }
                         break;
                     case 2:
                         if(i+j<BOARD_WIDTH && j<BOARD_HEIGHT){
-                            z =board[i+j][j];
+                            z =pArr[i+j][j];
                         }
                         else{
                             continue;
@@ -177,7 +222,7 @@ player FourInRow::checkWinner(){
                         break;
                     case 3:
                         if((i+j-(max-1)>=0) && (i+j-(max-1)<BOARD_WIDTH)){
-                            z =board[i+j-(max-1)][j];
+                            z =pArr[i+j-(max-1)][j];
                         }
                         else{
                             continue;
@@ -185,7 +230,7 @@ player FourInRow::checkWinner(){
                         break;
                     case 4:
                         if((max-i-j>=0) && (max-i-j<BOARD_WIDTH)){
-                            z =board[max-j-i][j];
+                            z =pArr[max-j-i][j];
                         }
                         else{
                             continue;
@@ -193,7 +238,7 @@ player FourInRow::checkWinner(){
                         break;
                     case 5:
                         if((2*max-2-j-i<BOARD_WIDTH) && (2*max-2-j-i>=0)){
-                            z =board[2*max-2-j-i][j];
+                            z =pArr[2*max-2-j-i][j];
                         }
                         else{
                             continue;
@@ -216,17 +261,31 @@ player FourInRow::checkWinner(){
                         break;
                 }
                 if(inRowRed >= 4){
-                    qDebug()<<"_______WINNER is RED________";
-                    checkResault = red;
+                    if(isVirtualArr == false){
+                        qDebug()<<"_______WINNER is RED________";
+                        checkResault = red;
+                    }
+                    if(isVirtualArr == true){
+                        qDebug()<<"_______FOUND Winning move for RED________";
+                        checkResault = red;
+                    }
                 }
                 if(inRowYellow >= 4){
-                    qDebug()<<"_______WINNER is YELLOW_____";
-                    checkResault = yellow;
+                    if(isVirtualArr == false){
+                        qDebug()<<"_______WINNER is YELLOW_____";
+                        checkResault = yellow;
+                    }
+                    if(isVirtualArr == true){
+                        qDebug()<<"_______FOUND Winning move for Yellow________";
+                        checkResault = yellow;
+                    }
                 }
             }
         }
     }
-    if ((checkResault==red) || (checkResault==yellow) || isDraw()){
+    if ((isVirtualArr == false) &&
+            ((checkResault==red) ||
+             (checkResault==yellow) ||  isDraw())){
         QString text = "";
         if(checkResault == red){
             text = "WINNER IS RED";

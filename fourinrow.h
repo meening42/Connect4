@@ -9,6 +9,7 @@
 #include <QKeyEvent>
 #include <QDebug>
 #include <QMessageBox>
+#include <tuple>
 
 #define BOARD_WIDTH 7
 #define BOARD_HEIGHT 6
@@ -21,6 +22,7 @@ enum player{
     empty
 };
 
+
 class FourInRow : public QWidget
 {
     Q_OBJECT
@@ -30,9 +32,8 @@ public:
     void showBoard();
     void insertCoinInRow(int row);
     void switchPlayerOnMove();
-    //void makeMove();
     void computerMove();
-    player checkWinner();
+    player checkWinner(player  Arr[BOARD_WIDTH][BOARD_HEIGHT],bool isVirtualArr);
     void initialize();
 
 public slots:
@@ -42,8 +43,11 @@ private:
     int selectedRow;
     int margin;
     int squareSize;
+    void copyBoradToVirtual();
+    std::tuple<bool,int,int> checkPossibleWin(player p);
     player playerOnMove;
     player board[BOARD_WIDTH][BOARD_HEIGHT];
+    player virtualBoard[BOARD_WIDTH][BOARD_HEIGHT];
     bool isDraw();
 };
 
