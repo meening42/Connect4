@@ -374,7 +374,7 @@ player FourInRow::checkWinner(player  pArr[BOARD_WIDTH][BOARD_HEIGHT],bool isVir
               initialize();
               break;
           case QMessageBox::Close:
-            // a->quit();
+            QApplication::instance()->quit();
             break;
         }
     }
