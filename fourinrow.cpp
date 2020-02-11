@@ -8,27 +8,56 @@ FourInRow::FourInRow(QWidget* pParent) :
     initialize();
     srand(time(NULL));
     qDebug()<<"constructor called ";
+    QTimer *timer;
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(update()));
 }
 
-
+void FourInRow::timerEvent(QTimerEvent *event){
+    update();
+}
 
 
 void FourInRow::paintEvent(QPaintEvent *event){
     QPainter P(this);
-    int multiplyer;
-
-    // draw selection circle
-    if (playerOnMove == red){
-        P.setPen(QPen(Qt::darkRed, 2));
-        P.setBrush(Qt::red);
-    }
-    else{
-        P.setPen(QPen(Qt::darkYellow, 2));
-        P.setBrush(Qt::yellow);
-    }
-    multiplyer = (width()-(2*MARGIN))/BOARD_WIDTH;
+    int multiplyer = multiplyer = (width()-(2*MARGIN))/BOARD_WIDTH;
     int circleSize = SQUARE_SIZE-1.5*MARGIN;
-    P.drawEllipse((1.5*MARGIN)+selectedRow*multiplyer,2*MARGIN,circleSize,circleSize);
+    // draw selection circle
+    if (coinFalling == false){
+        if (playerOnMove == red){
+            P.setPen(QPen(Qt::darkRed, 2));
+            P.setBrush(Qt::red);
+        }
+        else{
+            P.setPen(QPen(Qt::darkYellow, 2));
+            P.setBrush(Qt::yellow);
+        }
+        P.drawEllipse((1.5*MARGIN)+selectedRow*multiplyer,2*MARGIN,circleSize,circleSize);
+    }
+
+    // draw falling circle
+    int downPos = 0.95*fallingY*multiplyer+SQUARE_SIZE+MARGIN;
+    if (coinFalling == true){
+         //qDebug()<<"Coin falling routine called";
+        if (playerOnMove == red){
+            P.setPen(QPen(Qt::darkRed, 2));
+            P.setBrush(Qt::red);
+        }
+        else{
+            P.setPen(QPen(Qt::darkYellow, 2));
+            P.setBrush(Qt::yellow);
+        }
+        P.drawEllipse((1.5*MARGIN)+fallingX*multiplyer,fallingYPos,circleSize,circleSize);
+        fallingYPos+=5;
+        if (fallingYPos >=downPos){
+            qDebug()<<"Coin down";
+            killTimer(timerId);
+            coinFalling = false;
+            board[fallingX][fallingY]=playerOnMove;
+            // check winner
+            checkWinner(board,false);
+        }
+    }
 
     // draw circles on borad
     int multiplyerX = (width()-(2*MARGIN))/BOARD_WIDTH;
@@ -80,7 +109,7 @@ void FourInRow::paintEvent(QPaintEvent *event){
     for(int j = 0;j<=BOARD_HEIGHT;++j){
         P.drawLine(MARGIN,multiplyer*j+MARGIN+SQUARE_SIZE, width()-MARGIN ,multiplyer*j+MARGIN+SQUARE_SIZE);
     }
-
+    P.end();
 }
 
 
@@ -102,10 +131,8 @@ void FourInRow::keyPressEvent(QKeyEvent *event){
     {
         if(playerOnMove == red){
             insertCoinInRow(selectedRow);
-            checkWinner(board,false);
         }
     }
-
     update();
 }
 
@@ -116,12 +143,16 @@ void FourInRow::insertCoinInRow(int row){
     qDebug()<<"Insert coin in row: "<<row;
     for(int i = BOARD_HEIGHT-1;i>=0;--i){
         if(board[row][i]==empty){
-            board[row][i]=playerOnMove;
+            fallingY = i;
             break;
         }
     }
-    switchPlayerOnMove();
-    update();
+    // falling simulation
+    coinFalling = true;
+    fallingX = row;
+    fallingYPos = 2*MARGIN;
+    qDebug()<<"Coin falling";
+    timerId = startTimer(5);
 }
 
 
@@ -177,7 +208,9 @@ void FourInRow::initialize(){
     }
     winningPositionsRed.clear();
     winningPositionsYellow.clear();
+    coinFalling = false;
     gameOver = false;
+
 }
 
 void FourInRow::copyBoradToVirtual(){
@@ -192,7 +225,7 @@ void FourInRow::copyBoradToVirtual(){
 
 
 std::tuple<bool,int,int>FourInRow::checkPossibleWin(player p){
-    qDebug()<<"Check posible win for "<< p;
+    qDebug()<<"Check posible win for "<< ((p==red)? "red":"yellow");
     std::tuple <bool, int, int> temp = std::make_tuple(0, 0, false);
 
     //copy board to virtual board
@@ -217,7 +250,9 @@ std::tuple<bool,int,int>FourInRow::checkPossibleWin(player p){
 
 
 player FourInRow::checkWinner(player  pArr[BOARD_WIDTH][BOARD_HEIGHT],bool isVirtualArr){
-    qDebug()<<"checking winner ";
+    if(isVirtualArr == false){
+        qDebug()<<"checking winner ";
+    }
     // check horizontal:
     player checkResault =empty;
     int max = BOARD_WIDTH>BOARD_HEIGHT? BOARD_WIDTH:BOARD_HEIGHT;
@@ -378,6 +413,9 @@ player FourInRow::checkWinner(player  pArr[BOARD_WIDTH][BOARD_HEIGHT],bool isVir
             break;
         }
     }
+    if((gameOver == false) && (isVirtualArr == false)){
+        switchPlayerOnMove();
+    }
     return checkResault;
 }
 
@@ -391,6 +429,7 @@ bool FourInRow::isDraw(){
     }
     return true;
 }
+
 
 
 

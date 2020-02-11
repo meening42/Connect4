@@ -12,6 +12,7 @@
 #include <tuple>
 #include <vector>
 #include <QApplication>
+#include <QTimer>
 
 #define BOARD_WIDTH 7
 #define BOARD_HEIGHT 6
@@ -44,12 +45,20 @@ public:
 public slots:
     void paintEvent(QPaintEvent *event);
     void keyPressEvent(QKeyEvent *event);
+protected:
+    void timerEvent(QTimerEvent *event);
 private:
+
     bool gameOver;
     player winner;
     int margin;
     int selectedRow;
     int squareSize;
+    bool coinFalling;
+    int fallingX;
+    int fallingYPos;
+    int fallingY;
+    int timerId;
     void copyBoradToVirtual();
     std::tuple<bool,int,int> checkPossibleWin(player p);
     player playerOnMove;
