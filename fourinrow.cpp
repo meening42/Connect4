@@ -14,6 +14,7 @@ FourInRow::FourInRow(QWidget* pParent) :
 }
 
 void FourInRow::timerEvent(QTimerEvent *event){
+    //qDebug()<<"timer called";
     update();
 }
 
@@ -166,7 +167,7 @@ void FourInRow::switchPlayerOnMove(){
     else{
         playerOnMove = red;
     }
-};
+}
 
 
 
@@ -210,7 +211,6 @@ void FourInRow::initialize(){
     winningPositionsYellow.clear();
     coinFalling = false;
     gameOver = false;
-
 }
 
 void FourInRow::copyBoradToVirtual(){
