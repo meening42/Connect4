@@ -10,7 +10,8 @@ FourInRow::FourInRow(QWidget* pParent) :
     qDebug()<<"constructor called ";
     QTimer *timer;
     timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(update()));
+    timerId = startTimer(50);
+    //connect(timer, SIGNAL(timeout()), this, SLOT(update()));
 }
 
 void FourInRow::timerEvent(QTimerEvent *event){
@@ -38,7 +39,7 @@ void FourInRow::paintEvent(QPaintEvent *event){
 
     // draw falling circle
     int downPos = 0.95*fallingY*multiplyer+SQUARE_SIZE+MARGIN;
-    if (coinFalling == true){
+    if ((coinFalling == true) && (gameOver == false) ){
          //qDebug()<<"Coin falling routine called";
         if (playerOnMove == red){
             P.setPen(QPen(Qt::darkRed, 2));
@@ -49,14 +50,14 @@ void FourInRow::paintEvent(QPaintEvent *event){
             P.setBrush(Qt::yellow);
         }
         P.drawEllipse((1.5*MARGIN)+fallingX*multiplyer,fallingYPos,circleSize,circleSize);
-        fallingYPos+=5;
+        fallingYPos+=30;
         if (fallingYPos >=downPos){
             qDebug()<<"Coin down";
-            killTimer(timerId);
             coinFalling = false;
             board[fallingX][fallingY]=playerOnMove;
             // check winner
             checkWinner(board,false);
+            qDebug()<<"Coin down";
         }
     }
 
@@ -110,7 +111,7 @@ void FourInRow::paintEvent(QPaintEvent *event){
     for(int j = 0;j<=BOARD_HEIGHT;++j){
         P.drawLine(MARGIN,multiplyer*j+MARGIN+SQUARE_SIZE, width()-MARGIN ,multiplyer*j+MARGIN+SQUARE_SIZE);
     }
-    P.end();
+    //P.end();
 }
 
 
@@ -153,7 +154,6 @@ void FourInRow::insertCoinInRow(int row){
     fallingX = row;
     fallingYPos = 2*MARGIN;
     qDebug()<<"Coin falling";
-    timerId = startTimer(5);
 }
 
 
@@ -395,6 +395,8 @@ player FourInRow::checkWinner(player  pArr[BOARD_WIDTH][BOARD_HEIGHT],bool isVir
         else if(isDraw() && checkResault == empty){
             text = "DRAW";
         }
+        qDebug()<<"MessageBox";
+        killTimer(timerId);
         QMessageBox msgBox;
         msgBox.setText(text);
         msgBox.setInformativeText("Do you want to play another game?");
