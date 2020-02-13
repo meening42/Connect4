@@ -3,21 +3,38 @@
 FourInRow::FourInRow(QWidget* pParent) :
     QWidget(pParent)
 {
-    selectedRow = 0;
-    playerOnMove = red;
     initialize();
     srand(time(NULL));
     qDebug()<<"constructor called ";
-    QTimer *timer;
-    timer = new QTimer(this);
-    timerId = startTimer(50);
-    //connect(timer, SIGNAL(timeout()), this, SLOT(update()));
+
+    ptimer = new QTimer(this);
+    ptimer->setInterval(25);
+    connect(ptimer, SIGNAL(timeout()), this, SLOT(control()));
 }
 
-void FourInRow::timerEvent(QTimerEvent *event){
-    //qDebug()<<"timer called";
+
+void FourInRow::control(){
+    if((playerOnMove ==  red) && (insertCoin) && !coinFalling){
+        qDebug()<<"1";
+        insertCoinInRow(selectedRow);
+        coinFalling = true;
+        insertCoin = false;
+    }
+    if (checkWinnerSignal && !coinFalling){
+        qDebug()<<"2";
+        checkWinner(board,false);
+        checkWinnerSignal = false;
+        ptimer->stop();
+        switchPlayerOnMove();
+    }
     update();
 }
+
+//void FourInRow::timerEvent(QTimerEvent *event){
+//    qDebug()<<"timer called";
+//    control();
+
+//}
 
 
 void FourInRow::paintEvent(QPaintEvent *event){
@@ -50,14 +67,15 @@ void FourInRow::paintEvent(QPaintEvent *event){
             P.setBrush(Qt::yellow);
         }
         P.drawEllipse((1.5*MARGIN)+fallingX*multiplyer,fallingYPos,circleSize,circleSize);
-        fallingYPos+=30;
+        fallingYPos+=10;
         if (fallingYPos >=downPos){
             qDebug()<<"Coin down";
             coinFalling = false;
             board[fallingX][fallingY]=playerOnMove;
             // check winner
-            checkWinner(board,false);
-            qDebug()<<"Coin down";
+            qDebug()<<"Calling check winner down";
+            checkWinnerSignal = true;
+            //checkWinner(board,false);
         }
     }
 
@@ -111,7 +129,6 @@ void FourInRow::paintEvent(QPaintEvent *event){
     for(int j = 0;j<=BOARD_HEIGHT;++j){
         P.drawLine(MARGIN,multiplyer*j+MARGIN+SQUARE_SIZE, width()-MARGIN ,multiplyer*j+MARGIN+SQUARE_SIZE);
     }
-    //P.end();
 }
 
 
@@ -119,41 +136,47 @@ void FourInRow::paintEvent(QPaintEvent *event){
 void FourInRow::keyPressEvent(QKeyEvent *event){
     if(event->key() == Qt::Key_Right)
     {
-        if(selectedRow < BOARD_WIDTH-1){
+        if((selectedRow < BOARD_WIDTH-1) && (playerOnMove == red)){
             selectedRow+=1;
+            control();
+            update();
         }
     }
     if(event->key() == Qt::Key_Left)
     {
-        if(selectedRow >0){
+        if((selectedRow >0) && (playerOnMove == red) ){
             selectedRow-=1;
+            control();
+            update();
         }
     }
     if((event->key() == Qt::Key_Space) || (event->key() == Qt::Key_Down))
     {
-        if(playerOnMove == red){
-            insertCoinInRow(selectedRow);
+        if((playerOnMove == red) && !(coinFalling)){
+            insertCoin = true;
+            control();
+            update();
         }
     }
-    update();
 }
 
 
 
 
 void FourInRow::insertCoinInRow(int row){
+
     qDebug()<<"Insert coin in row: "<<row;
     for(int i = BOARD_HEIGHT-1;i>=0;--i){
         if(board[row][i]==empty){
             fallingY = i;
+            ptimer->start();
+            coinFalling = true;
+            fallingX = row;
+            fallingYPos = 2*MARGIN;
+            qDebug()<<"Coin falling";
             break;
         }
     }
-    // falling simulation
-    coinFalling = true;
-    fallingX = row;
-    fallingYPos = 2*MARGIN;
-    qDebug()<<"Coin falling";
 }
 
 
@@ -207,20 +230,23 @@ void FourInRow::initialize(){
             board[i][j]=empty;
         }
     }
+    selectedRow = 3;
+    playerOnMove = red;
     winningPositionsRed.clear();
     winningPositionsYellow.clear();
+    playerOnMove = red;
     coinFalling = false;
     gameOver = false;
+    insertCoin = false;
+    checkWinnerSignal = false;
 }
 
 void FourInRow::copyBoradToVirtual(){
-    qDebug()<<"copyBoradToVirtual";
     for(int i = 0; i<BOARD_WIDTH; ++i){
         for(int j=0;j<BOARD_HEIGHT;++j){
             virtualBoard[i][j] = board[i][j];
         }
     }
-    qDebug()<<"Borad copied to virtual";
 }
 
 
@@ -396,27 +422,25 @@ player FourInRow::checkWinner(player  pArr[BOARD_WIDTH][BOARD_HEIGHT],bool isVir
             text = "DRAW";
         }
         qDebug()<<"MessageBox";
-        killTimer(timerId);
         QMessageBox msgBox;
         msgBox.setText(text);
         msgBox.setInformativeText("Do you want to play another game?");
         msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Close);
         msgBox.setDefaultButton(QMessageBox::Ok);
-        //connect(&msgBox, &QMessageBox::Close,
-        //                     &a, &QApplication::quit);
         int ret = msgBox.exec();
-
         switch (ret) {
           case QMessageBox::Ok:
               initialize();
+              qDebug()<<"calling init";
               break;
           case QMessageBox::Close:
             QApplication::instance()->quit();
+            qDebug()<<"calling quit";
             break;
         }
     }
     if((gameOver == false) && (isVirtualArr == false)){
-        switchPlayerOnMove();
+        //switchPlayerOnMove();
     }
     return checkResault;
 }
