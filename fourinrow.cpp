@@ -8,7 +8,7 @@ FourInRow::FourInRow(QWidget* pParent) :
     qDebug()<<"constructor called ";
 
     ptimer = new QTimer(this);
-    ptimer->setInterval(25);
+    ptimer->setInterval(18);
     connect(ptimer, SIGNAL(timeout()), this, SLOT(control()));
 }
 
@@ -239,6 +239,7 @@ void FourInRow::initialize(){
     gameOver = false;
     insertCoin = false;
     checkWinnerSignal = false;
+    winner = empty;
 }
 
 void FourInRow::copyBoradToVirtual(){
@@ -287,11 +288,13 @@ player FourInRow::checkWinner(player  pArr[BOARD_WIDTH][BOARD_HEIGHT],bool isVir
         for(int i=0;i<max;i++){
             int inRowRed=0;
             int inRowYellow=0;
+            PositionsRed.clear();
+            PositionsYellow.clear();
             for(int j=0;j<max;j++){
                 player z = empty;
                 switch (k) {
                     case 0: // check vertically
-                        if(i<BOARD_WIDTH && j<BOARD_HEIGHT){
+                        if(i<BOARD_WIDTH && (j<BOARD_HEIGHT)){
                             z = pArr[i][j];
                             position.x = i;
                             position.y = j;
@@ -315,7 +318,7 @@ player FourInRow::checkWinner(player  pArr[BOARD_WIDTH][BOARD_HEIGHT],bool isVir
                         }
                         break;
                     case 3:
-                        if((i+j-(max-1)>=0) && (i+j-(max-1)<BOARD_WIDTH)){
+                        if((i+j-(max-1)>=0) && (i+j-(max-1)<BOARD_WIDTH)&& (j<BOARD_HEIGHT)){
                             z =pArr[i+j-(max-1)][j];
                             position.x = i+j-(max-1);
                             position.y = j;
@@ -325,7 +328,7 @@ player FourInRow::checkWinner(player  pArr[BOARD_WIDTH][BOARD_HEIGHT],bool isVir
                         }
                         break;
                     case 4:
-                        if((max-i-j>=0) && (max-i-j<BOARD_WIDTH)){
+                        if((max-i-j>=0) && (max-i-j<BOARD_WIDTH)&& (j<BOARD_HEIGHT)){
                             z =pArr[max-j-i][j];
                             position.x = max-j-i;
                             position.y = j;
@@ -335,7 +338,7 @@ player FourInRow::checkWinner(player  pArr[BOARD_WIDTH][BOARD_HEIGHT],bool isVir
                         }
                         break;
                     case 5:
-                        if((2*max-2-j-i<BOARD_WIDTH) && (2*max-2-j-i>=0)){
+                        if((2*max-2-j-i<BOARD_WIDTH) && (2*max-2-j-i>=0)&& (j<BOARD_HEIGHT)){
                             z =pArr[2*max-2-j-i][j];
                             position.x = 2*max-2-j-i;
                             position.y = j;
