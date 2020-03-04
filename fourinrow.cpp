@@ -14,7 +14,7 @@ FourInRow::FourInRow(QWidget* pParent) :
 
 
 void FourInRow::control(){
-    if((playerOnMove ==  red) && (insertCoin) && !coinFalling){
+    if((playerOnMove ==  red) && (insertCoin) && (!coinFalling) && (board[selectedRow][0]==empty)){
         qDebug()<<"1";
         insertCoinInRow(selectedRow);
         coinFalling = true;
